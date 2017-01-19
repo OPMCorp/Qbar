@@ -29,8 +29,8 @@ public class FluidUtils
             if (simulated > 0)
             {
                 fluidHandler.fill(inputFluidHandler.drain(simulated, true), true);
-                if (inputFluidHandler.getTankProperties()[0].getContents() == null
-                        || inputFluidHandler.getTankProperties()[0].getContents().amount == 0)
+                if ((inputFluidHandler.getTankProperties()[0].getContents() == null
+                        || inputFluidHandler.getTankProperties()[0].getContents().amount == 0) && !player.isCreative())
                 {
                     output = inputFluidHandler.getContainer();
                     if (input.getCount() == 1)
