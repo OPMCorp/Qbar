@@ -66,10 +66,16 @@ public class FluidUtils
 
                 output = inputFluidHandler.getContainer();
                 if (input.getCount() == 1)
-                    player.inventory.setInventorySlotContents(player.inventory.currentItem, output);
+                {
+                    if (!player.isCreative())
+                        player.inventory.setInventorySlotContents(player.inventory.currentItem, output);
+                    else
+                        player.inventory.addItemStackToInventory(output);
+                }
                 else
                 {
-                    player.inventory.decrStackSize(player.inventory.currentItem, 1);
+                    if (!player.isCreative())
+                        player.inventory.decrStackSize(player.inventory.currentItem, 1);
                     if (!player.inventory.addItemStackToInventory(output))
                         player.entityDropItem(output, 0);
                 }
