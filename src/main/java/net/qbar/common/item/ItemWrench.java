@@ -29,7 +29,6 @@ public class ItemWrench extends ItemBase
             {
                 TileBelt belt = (TileBelt) te;
                 EnumFacing face = belt.getFacing().rotateAround(Axis.Y);
-                System.out.println(face);
                 world.getBlockState(pos).getBlock().rotateBlock(world, pos, face);
             }
         }
