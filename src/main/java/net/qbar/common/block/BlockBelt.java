@@ -7,6 +7,7 @@ import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
@@ -15,17 +16,20 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.qbar.common.IWrenchable;
 import net.qbar.common.grid.GridManager;
 import net.qbar.common.tile.TileBelt;
 
-public class BlockBelt extends BlockMachineBase
+public class BlockBelt extends BlockMachineBase implements IWrenchable
 {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    public static final PropertyBool      SLOP   = PropertyBool.create("slop");
 
     public BlockBelt()
     {
         super("belt", Material.IRON);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(BlockBelt.FACING, EnumFacing.NORTH));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(BlockBelt.FACING, EnumFacing.NORTH)
+                .withProperty(BlockBelt.SLOP, false));
     }
 
     @Override
@@ -139,6 +143,16 @@ public class BlockBelt extends BlockMachineBase
         return new BlockStateContainer(this, BlockBelt.FACING);
     }
 
+    public boolean getSlopState(final IBlockState state, final BlockPos pos)
+    {
+        return state.getValue(BlockBelt.SLOP).booleanValue();
+    }
+
+    public void setSlopState(final World world, final BlockPos pos, final boolean value)
+    {
+        world.setBlockState(pos, world.getBlockState(pos).withProperty(BlockBelt.SLOP, value));
+    }
+
     @Override
     public boolean rotateBlock(final World world, final BlockPos pos, final EnumFacing facing)
     {
@@ -157,5 +171,18 @@ public class BlockBelt extends BlockMachineBase
     public TileEntity createNewTileEntity(final World worldIn, final int meta)
     {
         return new TileBelt(.05f);
+    }
+
+    @Override
+    public boolean onWrench(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing)
+    {
+        if (player.isSneaking())
+        {
+            IBlockState state = world.getBlockState(pos);
+            this.setSlopState(world, pos, !this.getSlopState(state, pos));
+        }
+        else
+            this.rotateBlock(world, pos, facing.rotateAround(Axis.Y));
+        return true;
     }
 }
