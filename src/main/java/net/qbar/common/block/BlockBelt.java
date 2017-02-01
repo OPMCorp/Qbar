@@ -143,9 +143,14 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
         return new BlockStateContainer(this, BlockBelt.FACING);
     }
 
-    public boolean getSlopState(final IBlockState state, final BlockPos pos)
+    public boolean getSlopState(final IBlockState state)
     {
         return state.getValue(BlockBelt.SLOP).booleanValue();
+    }
+
+    public EnumFacing getFacing(final IBlockState state)
+    {
+        return state.getValue(BlockBelt.FACING);
     }
 
     public void setSlopState(final World world, final BlockPos pos, final boolean value)
@@ -176,13 +181,13 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     @Override
     public boolean onWrench(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing)
     {
+        IBlockState state = world.getBlockState(pos);
         if (player.isSneaking())
         {
-            IBlockState state = world.getBlockState(pos);
-            this.setSlopState(world, pos, !this.getSlopState(state, pos));
+            this.setSlopState(world, pos, !this.getSlopState(state));
         }
         else
-            this.rotateBlock(world, pos, facing.rotateAround(Axis.Y));
+            this.rotateBlock(world, pos, getFacing(state).rotateAround(Axis.Y));
         return true;
     }
 }

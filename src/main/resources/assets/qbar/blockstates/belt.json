@@ -8,18 +8,33 @@
         }
     },
     "variants": {
-        "facing=north": {
+        "facing=north,slop=false": {
             "model": "orientable"
         },
-        "facing=south": {
+        "facing=south,slop=false": {
             "model": "orientable",
             "y": 180
         },
-        "facing=west": {
+        "facing=west,slop=false": {
             "model": "orientable",
             "y": 270
         },
-        "facing=east": {
+        "facing=east,slop=false": {
+            "model": "orientable",
+            "y": 90
+        },
+        "facing=north,slop=true": {
+            "model": "orientable"
+        },
+        "facing=south,slop=true": {
+            "model": "orientable",
+            "y": 180
+        },
+        "facing=west,slop=true": {
+            "model": "orientable",
+            "y": 270
+        },
+        "facing=east,slop=true": {
             "model": "orientable",
             "y": 90
         },
