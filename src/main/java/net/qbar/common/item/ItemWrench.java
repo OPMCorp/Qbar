@@ -1,14 +1,13 @@
 package net.qbar.common.item;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.qbar.common.tile.TileBelt;
+import net.qbar.common.IWrenchable;
 
 public class ItemWrench extends ItemBase
 {
@@ -22,15 +21,16 @@ public class ItemWrench extends ItemBase
     public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing,
             float hitX, float hitY, float hitZ)
     {
-        TileEntity te = world.getTileEntity(pos);
+        Block block = world.getBlockState(pos).getBlock();
         if (!world.isRemote)
         {
-            if (te instanceof TileBelt)
+            if (block instanceof IWrenchable)
             {
-                TileBelt belt = (TileBelt) te;
-                EnumFacing face = belt.getFacing().rotateAround(Axis.Y);
-                world.getBlockState(pos).getBlock().rotateBlock(world, pos, face);
+                ((IWrenchable) block).onWrench(player, world, pos, hand, facing);
             }
+            else
+                block.rotateBlock(world, pos, facing.rotateAround(facing.getAxis()));
+
         }
         return EnumActionResult.PASS;
     }
