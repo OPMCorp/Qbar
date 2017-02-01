@@ -14,7 +14,7 @@ public class QBarItems
     public static final ItemBase PUNCHED_CARD = null;
 
     @ObjectHolder("wrench")
-    public static final ItemBase WRNECH       = null;
+    public static final ItemBase WRENCH       = null;
 
     public static final void registerItems()
     {
