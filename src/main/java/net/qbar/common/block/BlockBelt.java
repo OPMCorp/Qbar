@@ -114,18 +114,22 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     @Override
     public IBlockState getStateFromMeta(final int meta)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(meta);
+        EnumFacing enumfacing = EnumFacing.getFront(meta >> 1);
+        boolean slop = (meta & 1) == 1;
 
         if (enumfacing.getAxis() == EnumFacing.Axis.Y)
             enumfacing = EnumFacing.NORTH;
 
-        return this.getDefaultState().withProperty(BlockBelt.FACING, enumfacing);
+        return this.getDefaultState().withProperty(BlockBelt.FACING, enumfacing).withProperty(BlockBelt.SLOP, slop);
     }
 
     @Override
     public int getMetaFromState(final IBlockState state)
     {
-        return state.getValue(BlockBelt.FACING).getIndex();
+        int meta = state.getValue(BlockBelt.FACING).getIndex();
+        meta <<= 1;
+        meta += state.getValue(BlockBelt.SLOP) ? 1 : 0;
+        return meta;
     }
 
     @Override
