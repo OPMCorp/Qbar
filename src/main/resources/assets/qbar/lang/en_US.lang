@@ -15,6 +15,7 @@ tile.belt.name=Belt
 
 #Items
 item.punched_card.name=Punched Card
+item.wrench.name=Wrench
 
 #Fluids
 fluid.steam=Steam
