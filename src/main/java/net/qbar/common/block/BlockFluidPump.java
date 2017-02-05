@@ -15,7 +15,7 @@ import net.qbar.common.tile.TileFluidPump;
 
 public class BlockFluidPump extends BlockMachineBase
 {
-    public static PropertyDirection FACING = PropertyDirection.create("facing", facing -> true);
+    public static PropertyDirection FACING = PropertyDirection.create("facing");
 
     public BlockFluidPump()
     {
@@ -41,8 +41,8 @@ public class BlockFluidPump extends BlockMachineBase
     public IBlockState getStateFromMeta(final int meta)
     {
         int facingInt = meta;
-        if (facingInt > 4)
-            facingInt = facingInt - 4;
+        if (facingInt > 5)
+            facingInt = facingInt - 5;
         final EnumFacing facing = EnumFacing.VALUES[facingInt];
         return this.getDefaultState().withProperty(BlockFluidPump.FACING, facing);
     }
