@@ -26,7 +26,7 @@ public class ItemWrench extends ItemBase
         {
             if (block instanceof IWrenchable)
             {
-                ((IWrenchable) block).onWrench(player, world, pos, hand, facing);
+                ((IWrenchable) block).onWrench(player, world, pos, hand, facing, world.getBlockState(pos));
             }
             else
                 block.rotateBlock(world, pos, facing.rotateAround(facing.getAxis()));

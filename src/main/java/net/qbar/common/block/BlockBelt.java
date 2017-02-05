@@ -1,10 +1,8 @@
 package net.qbar.common.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -15,18 +13,14 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.qbar.common.IWrenchable;
 import net.qbar.common.grid.GridManager;
 import net.qbar.common.tile.TileBelt;
 
-public class BlockBelt extends BlockMachineBase implements IWrenchable
+public class BlockBelt extends BlockOrientableMachine
 {
-    public static final PropertyDirection FACING = BlockHorizontal.FACING;
-    public static final PropertyBool      SLOP   = PropertyBool.create("slop");
+    public static final PropertyBool SLOP = PropertyBool.create("slop");
 
     public BlockBelt()
     {
@@ -95,30 +89,19 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     }
 
     @Override
-    public IBlockState getStateForPlacement(final World worldIn, final BlockPos pos, final EnumFacing facing,
-            final float hitX, final float hitY, final float hitZ, final int meta, final EntityLivingBase placer)
-    {
-        return this.getDefaultState().withProperty(BlockBelt.FACING, placer.getHorizontalFacing().getOpposite());
-    }
-
-    @Override
     public void onBlockPlacedBy(final World w, final BlockPos pos, final IBlockState state,
             final EntityLivingBase placer, final ItemStack stack)
     {
-        w.setBlockState(pos, state.withProperty(BlockBelt.FACING, placer.getHorizontalFacing().getOpposite()), 2);
-
+        super.onBlockPlacedBy(w, pos, state, placer, stack);
         if (!w.isRemote)
-            ((TileBelt) w.getTileEntity(pos)).setFacing(state.getValue(BlockBelt.FACING));
+            ((TileBelt) w.getTileEntity(pos)).setFacing(this.getFacing(state));
     }
 
     @Override
     public IBlockState getStateFromMeta(final int meta)
     {
-        EnumFacing enumfacing = EnumFacing.getFront(meta >> 1);
-        boolean slop = (meta & 1) == 1;
-
-        if (enumfacing.getAxis() == EnumFacing.Axis.Y)
-            enumfacing = EnumFacing.NORTH;
+        EnumFacing enumfacing = super.getFacing(meta);
+        boolean slop = ((meta >> BlockOrientableMachine.NEEDED_BIT) & 1) == 1;
 
         return this.getDefaultState().withProperty(BlockBelt.FACING, enumfacing).withProperty(BlockBelt.SLOP, slop);
     }
@@ -126,22 +109,10 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     @Override
     public int getMetaFromState(final IBlockState state)
     {
-        int meta = state.getValue(BlockBelt.FACING).getIndex();
-        meta <<= 1;
-        meta += state.getValue(BlockBelt.SLOP) ? 1 : 0;
+        int meta = state.getValue(BlockBelt.SLOP) ? 1 : 0;
+        meta <<= BlockOrientableMachine.NEEDED_BIT;
+        meta |= super.getMetaFromState(state);
         return meta;
-    }
-
-    @Override
-    public IBlockState withRotation(final IBlockState state, final Rotation rot)
-    {
-        return state.withProperty(BlockBelt.FACING, rot.rotate(state.getValue(BlockBelt.FACING)));
-    }
-
-    @Override
-    public IBlockState withMirror(final IBlockState state, final Mirror mirrorIn)
-    {
-        return state.withRotation(mirrorIn.toRotation(state.getValue(BlockBelt.FACING)));
     }
 
     @Override
@@ -155,11 +126,6 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
         return state.getValue(BlockBelt.SLOP).booleanValue();
     }
 
-    public EnumFacing getFacing(final IBlockState state)
-    {
-        return state.getValue(BlockBelt.FACING);
-    }
-
     public void setSlopState(final World world, final BlockPos pos, final boolean value)
     {
         world.setBlockState(pos, world.getBlockState(pos).withProperty(BlockBelt.SLOP, value));
@@ -168,9 +134,7 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     @Override
     public boolean rotateBlock(final World world, final BlockPos pos, final EnumFacing facing)
     {
-        if (facing == null || !EnumFacing.Plane.HORIZONTAL.apply(facing))
-            return false;
-        world.setBlockState(pos, world.getBlockState(pos).withProperty(BlockBelt.FACING, facing));
+        super.rotateBlock(world, pos, facing);
         if (!world.isRemote)
         {
             ((TileBelt) world.getTileEntity(pos)).setFacing(facing);
@@ -186,9 +150,9 @@ public class BlockBelt extends BlockMachineBase implements IWrenchable
     }
 
     @Override
-    public boolean onWrench(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing)
+    public boolean onWrench(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing,
+            IBlockState state)
     {
-        IBlockState state = world.getBlockState(pos);
         if (player.isSneaking())
         {
             this.setSlopState(world, pos, !this.getSlopState(state));

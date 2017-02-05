@@ -11,17 +11,19 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.qbar.common.IWrenchable;
 import net.qbar.common.multiblock.BlockMultiblockBase;
 import net.qbar.common.multiblock.Multiblocks;
 import net.qbar.common.tile.TileTank;
 import net.qbar.common.util.FluidUtils;
 
-public class BlockTank extends BlockMultiblockBase
+public class BlockTank extends BlockMultiblockBase implements IWrenchable
 {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
 
@@ -127,5 +129,13 @@ public class BlockTank extends BlockMultiblockBase
     public TileEntity createNewTileEntity(final World worldIn, final int meta)
     {
         return new TileTank();
+    }
+
+    @Override
+    public boolean onWrench(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing,
+            IBlockState state)
+    {
+        this.rotateBlock(world, pos, state.getValue(BlockTank.FACING).rotateAround(Axis.Y));
+        return true;
     }
 }
