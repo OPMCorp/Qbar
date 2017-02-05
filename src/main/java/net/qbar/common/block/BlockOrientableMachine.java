@@ -27,7 +27,8 @@ public abstract class BlockOrientableMachine extends BlockMachineBase implements
     public BlockOrientableMachine(String name, Material material)
     {
         super(name, material);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(BlockBelt.FACING, EnumFacing.NORTH));
+        this.setDefaultState(
+                this.blockState.getBaseState().withProperty(BlockOrientableMachine.FACING, EnumFacing.NORTH));
     }
 
     @Nullable
@@ -49,7 +50,7 @@ public abstract class BlockOrientableMachine extends BlockMachineBase implements
 
     public EnumFacing getFacing(final IBlockState state)
     {
-        return state.getValue(BlockBelt.FACING);
+        return state.getValue(BlockOrientableMachine.FACING);
     }
 
     @Override
