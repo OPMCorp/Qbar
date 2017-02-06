@@ -39,12 +39,6 @@ public class BlockSteamPipe extends BlockMachineBase
     }
 
     @Override
-    public boolean isFullBlock(final IBlockState state)
-    {
-        return false;
-    }
-
-    @Override
     public boolean isFullCube(final IBlockState state)
     {
         return false;
