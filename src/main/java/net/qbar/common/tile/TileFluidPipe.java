@@ -1,8 +1,6 @@
 package net.qbar.common.tile;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -12,30 +10,18 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.qbar.client.render.tile.VisibilityModelState;
-import net.qbar.common.event.TickHandler;
-import net.qbar.common.grid.GridManager;
 import net.qbar.common.grid.IFluidPipe;
 import net.qbar.common.grid.ITileCable;
 import net.qbar.common.grid.PipeGrid;
 
-public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IFluidPipe, ILoadable
+public class TileFluidPipe extends TilePipeBase<PipeGrid, IFluidHandler> implements IFluidPipe
 {
-    private int                                             grid;
-    private final EnumMap<EnumFacing, ITileCable<PipeGrid>> connections;
-    private final EnumMap<EnumFacing, IFluidHandler>        adjacentFluidHandler;
 
-    private FluidStack                                      coldStorage;
-
-    private int                                             transferCapacity;
+    private FluidStack coldStorage;
 
     public TileFluidPipe(final int transferCapacity)
     {
-        this.transferCapacity = transferCapacity;
-
-        this.connections = new EnumMap<>(EnumFacing.class);
-        this.adjacentFluidHandler = new EnumMap<>(EnumFacing.class);
-        this.grid = -1;
+        super(transferCapacity, CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
     }
 
     public TileFluidPipe()
@@ -43,58 +29,22 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
         this(0);
     }
 
-    @Override
-    public boolean hasCapability(final Capability<?> capability, final EnumFacing facing)
-    {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
-            return this.getGrid() != -1 && this.getGridObject() != null;
-        return super.hasCapability(capability, facing);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getCapability(final Capability<T> capability, final EnumFacing facing)
     {
-        if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY)
+        if (capability == this.capability)
             return (T) this.getGridObject().getTank();
         return super.getCapability(capability, facing);
     }
 
     @Override
-    public void addInfo(final List<String> lines)
+    public void addSpecificInfo(List<String> lines)
     {
-        lines.add("Grid: " + this.grid);
-
-        if (this.getGrid() != -1 && this.getGridObject() != null)
-        {
-            lines.add("Contains: " + (this.getGridObject().getTank().getFluidType() == null ? "none"
-                    : this.getGridObject().getTank().getFluidType().getName()));
-            lines.add("Buffer: " + this.getGridObject().getTank().getFluidAmount() + " / "
-                    + this.getGridObject().getTank().getCapacity() + " mb");
-        }
-        else
-            lines.add("Errored grid!");
-        this.connections.forEach((facing, cable) -> lines.add("Pipe " + facing + ": " + (cable != null)));
-        this.adjacentFluidHandler
-                .forEach((facing, handler) -> lines.add("FluidHandler " + facing + ": " + (handler != null)));
-    }
-
-    @Override
-    public EnumFacing[] getConnections()
-    {
-        return this.connections.keySet().toArray(new EnumFacing[0]);
-    }
-
-    @Override
-    public ITileCable<PipeGrid> getConnected(final EnumFacing facing)
-    {
-        return this.connections.get(facing);
-    }
-
-    @Override
-    public int getGrid()
-    {
-        return this.grid;
+        lines.add("Contains: " + (this.getGridObject().getTank().getFluidType() == null ? "none"
+                : this.getGridObject().getTank().getFluidType().getName()));
+        lines.add("Buffer: " + this.getGridObject().getTank().getFluidAmount() + " / "
+                + this.getGridObject().getTank().getCapacity() + " mb");
     }
 
     @Override
@@ -118,19 +68,8 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
     {
         super.readFromNBT(tagCompound);
 
-        this.transferCapacity = tagCompound.getInteger("transferCapacity");
         if (tagCompound.hasKey("coldStorage"))
             this.coldStorage = FluidStack.loadFluidStackFromNBT(tagCompound.getCompoundTag("coldStorage"));
-
-        this.connections.clear();
-        this.adjacentFluidHandler.clear();
-        for (final EnumFacing facing : EnumFacing.VALUES)
-        {
-            if (tagCompound.hasKey("connected" + facing.ordinal()))
-                this.connect(facing, null);
-            if (tagCompound.hasKey("connectedfluid" + facing.ordinal()))
-                this.connectFluidHandler(facing, null);
-        }
     }
 
     @Override
@@ -138,7 +77,6 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
     {
         super.writeToNBT(tagCompound);
 
-        tagCompound.setInteger("transferCapacity", this.transferCapacity);
         this.toColdStorage();
         if (this.coldStorage != null)
         {
@@ -146,18 +84,7 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
             this.coldStorage.writeToNBT(tag);
             tagCompound.setTag("coldStorage", tag);
         }
-
-        for (final Entry<EnumFacing, ITileCable<PipeGrid>> entry : this.connections.entrySet())
-            tagCompound.setBoolean("connected" + entry.getKey().ordinal(), true);
-        for (final Entry<EnumFacing, IFluidHandler> entry : this.adjacentFluidHandler.entrySet())
-            tagCompound.setBoolean("connectedfluid" + entry.getKey().ordinal(), true);
         return tagCompound;
-    }
-
-    @Override
-    public void onChunkUnload()
-    {
-        GridManager.getInstance().disconnectCable(this);
     }
 
     @Override
@@ -181,32 +108,7 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
     }
 
     @Override
-    public void connect(final EnumFacing facing, final ITileCable<PipeGrid> to)
-    {
-        this.connections.put(facing, to);
-        this.updateState();
-    }
-
-    @Override
-    public void disconnect(final EnumFacing facing)
-    {
-        this.connections.remove(facing);
-        this.updateState();
-    }
-
-    public void connectFluidHandler(final EnumFacing facing, final IFluidHandler to)
-    {
-        this.adjacentFluidHandler.put(facing, to);
-        this.updateState();
-    }
-
-    public void disconnectFluidHandler(final EnumFacing facing)
-    {
-        this.adjacentFluidHandler.remove(facing);
-        this.updateState();
-    }
-
-    public void scanFluidHandlers(final BlockPos posNeighbor)
+    public void scanHandlers(final BlockPos posNeighbor)
     {
         final TileEntity tile = this.world.getTileEntity(posNeighbor);
 
@@ -214,12 +116,12 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
         final EnumFacing facing = EnumFacing.getFacingFromVector(substract.getX(), substract.getY(), substract.getZ())
                 .getOpposite();
 
-        if (this.adjacentFluidHandler.containsKey(facing.getOpposite()))
+        if (this.adjacentHandler.containsKey(facing.getOpposite()))
         {
-            if (tile == null || !tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing))
+            if (tile == null || !tile.hasCapability(this.capability, facing))
             {
-                this.disconnectFluidHandler(facing.getOpposite());
-                if (this.adjacentFluidHandler.isEmpty())
+                this.disconnectHandler(facing.getOpposite());
+                if (this.adjacentHandler.isEmpty())
                     this.getGridObject().removeOutput(this);
             }
         }
@@ -227,11 +129,9 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
         {
             if (tile != null)
             {
-                if (tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing)
-                        && !(tile instanceof TileFluidPipe))
+                if (tile.hasCapability(this.capability, facing) && !(tile instanceof TileFluidPipe))
                 {
-                    this.connectFluidHandler(facing.getOpposite(),
-                            tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing));
+                    this.connectHandler(facing.getOpposite(), tile.getCapability(this.capability, facing));
                     this.getGridObject().addOutput(this);
                 }
             }
@@ -241,7 +141,7 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
     @Override
     public void fillNeighbors()
     {
-        for (final IFluidHandler fluidHandler : this.adjacentFluidHandler.values())
+        for (final IFluidHandler fluidHandler : this.adjacentHandler.values())
         {
             if (this.getGridObject().getTank().getFluidAmount() != 0)
             {
@@ -251,27 +151,6 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
                     fluidHandler.fill(this.getGridObject().getTank().drain(simulated, true), true);
             }
         }
-    }
-
-    @Override
-    public void onLoad()
-    {
-        super.onLoad();
-        if (this.isServer() && this.getGrid() == -1)
-            TickHandler.loadables.add(this);
-        else if (this.isClient())
-        {
-            this.forceSync();
-            this.updateState();
-        }
-    }
-
-    @Override
-    public void load()
-    {
-        GridManager.getInstance().connectCable(this);
-        for (final EnumFacing facing : EnumFacing.VALUES)
-            this.scanFluidHandlers(this.pos.offset(facing));
     }
 
     public void toColdStorage()
@@ -287,97 +166,5 @@ public class TileFluidPipe extends QBarTileBase implements ITileInfoProvider, IF
     public PipeGrid createGrid(final int id)
     {
         return new PipeGrid(id, this.transferCapacity);
-    }
-
-    ////////////
-    // RENDER //
-    ////////////
-
-    public final VisibilityModelState state = new VisibilityModelState();
-
-    private void updateState()
-    {
-        if (this.isServer())
-        {
-            this.sync();
-            return;
-        }
-        this.state.hidden.clear();
-
-        if (this.connections.isEmpty() && this.adjacentFluidHandler.isEmpty())
-        {
-            this.state.hidden.add("armx1");
-            this.state.hidden.add("armx2");
-            this.state.hidden.add("army1");
-            this.state.hidden.add("army2");
-            this.state.hidden.add("armz1");
-            this.state.hidden.add("armz2");
-            this.state.hidden.add("straightx");
-            this.state.hidden.add("straighty");
-            this.state.hidden.add("straightz");
-        }
-        else if (this.isStraight())
-        {
-            this.state.hidden.add("center");
-            this.state.hidden.add("armx1");
-            this.state.hidden.add("armx2");
-
-            this.state.hidden.add("army1");
-            this.state.hidden.add("army2");
-
-            this.state.hidden.add("armz1");
-            this.state.hidden.add("armz2");
-
-            if (this.isConnected(EnumFacing.WEST))
-            {
-                this.state.hidden.add("straighty");
-                this.state.hidden.add("straightz");
-            }
-            else if (this.isConnected(EnumFacing.NORTH))
-            {
-                this.state.hidden.add("straighty");
-                this.state.hidden.add("straightx");
-            }
-            else if (this.isConnected(EnumFacing.UP))
-            {
-                this.state.hidden.add("straightx");
-                this.state.hidden.add("straightz");
-            }
-        }
-        else
-        {
-            this.state.hidden.add("straightx");
-            this.state.hidden.add("straighty");
-            this.state.hidden.add("straightz");
-
-            if (!this.isConnected(EnumFacing.UP))
-                this.state.hidden.add("army1");
-            if (!this.isConnected(EnumFacing.DOWN))
-                this.state.hidden.add("army2");
-            if (!this.isConnected(EnumFacing.NORTH))
-                this.state.hidden.add("armz1");
-            if (!this.isConnected(EnumFacing.SOUTH))
-                this.state.hidden.add("armz2");
-            if (!this.isConnected(EnumFacing.EAST))
-                this.state.hidden.add("armx1");
-            if (!this.isConnected(EnumFacing.WEST))
-                this.state.hidden.add("armx2");
-        }
-
-        this.world.markBlockRangeForRenderUpdate(this.pos, this.pos);
-    }
-
-    private boolean isStraight()
-    {
-        if (this.connections.size() + this.adjacentFluidHandler.size() == 2)
-            return this.isConnected(EnumFacing.NORTH) && this.isConnected(EnumFacing.SOUTH)
-                    || this.isConnected(EnumFacing.WEST) && this.isConnected(EnumFacing.EAST)
-                    || this.isConnected(EnumFacing.UP) && this.isConnected(EnumFacing.DOWN);
-        return false;
-    }
-
-    private boolean isConnected(final EnumFacing facing)
-    {
-        return this.connections.containsKey(facing) || this.adjacentFluidHandler.containsKey(facing);
     }
 }
