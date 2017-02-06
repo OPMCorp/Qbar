@@ -19,13 +19,13 @@ import net.qbar.common.tile.TileSteamPipe;
 
 public class BlockSteamPipe extends BlockMachineBase
 {
-    protected static final AxisAlignedBB AABB_NONE  = new AxisAlignedBB(0.35D, 0.25D, 0.35D, 0.65D, 0.55D, 0.65D);
-    protected static final AxisAlignedBB AABB_EAST  = new AxisAlignedBB(0.65D, 0.25D, 0.35D, 1.00D, 0.55D, 0.65D);
-    protected static final AxisAlignedBB AABB_WEST  = new AxisAlignedBB(0.00D, 0.25D, 0.35D, 0.35D, 0.55D, 0.35D);
-    protected static final AxisAlignedBB AABB_SOUTH = new AxisAlignedBB(0.65D, 0.25D, 0.35D, 0.65D, 0.55D, 1.00D);
-    protected static final AxisAlignedBB AABB_NORTH = new AxisAlignedBB(0.35D, 0.25D, 0.00D, 0.35D, 0.55D, 0.35D);
-    protected static final AxisAlignedBB AABB_UP    = new AxisAlignedBB(0.35D, 0.55D, 0.35D, 0.65D, 1.00D, 0.65D);
-    protected static final AxisAlignedBB AABB_DOWN  = new AxisAlignedBB(0.35D, 0.00D, 0.35D, 0.65D, 0.25D, 0.65D);
+    protected static final AxisAlignedBB AABB_NONE  = new AxisAlignedBB(0.34D, 0.24D, 0.34D, 0.66D, 0.56D, 0.66D);
+    protected static final AxisAlignedBB AABB_EAST  = new AxisAlignedBB(0.66D, 0.24D, 0.34D, 1.00D, 0.56D, 0.66D);
+    protected static final AxisAlignedBB AABB_WEST  = new AxisAlignedBB(0.00D, 0.24D, 0.34D, 0.34D, 0.56D, 0.34D);
+    protected static final AxisAlignedBB AABB_SOUTH = new AxisAlignedBB(0.66D, 0.24D, 0.34D, 0.66D, 0.56D, 1.00D);
+    protected static final AxisAlignedBB AABB_NORTH = new AxisAlignedBB(0.34D, 0.24D, 0.00D, 0.34D, 0.56D, 0.34D);
+    protected static final AxisAlignedBB AABB_UP    = new AxisAlignedBB(0.34D, 0.56D, 0.34D, 0.66D, 1.00D, 0.66D);
+    protected static final AxisAlignedBB AABB_DOWN  = new AxisAlignedBB(0.34D, 0.00D, 0.34D, 0.66D, 0.24D, 0.66D);
 
     public BlockSteamPipe()
     {
