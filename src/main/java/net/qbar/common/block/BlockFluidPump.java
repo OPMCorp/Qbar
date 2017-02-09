@@ -94,7 +94,7 @@ public class BlockFluidPump extends BlockOrientableMachine
             case SOUTH:
                 return AABB_SOUTH;
             default:
-                return AABB_CUBE;
+                return FULL_BLOCK_AABB;
         }
     }
 }
