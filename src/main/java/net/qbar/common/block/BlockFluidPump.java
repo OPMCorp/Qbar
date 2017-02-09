@@ -93,7 +93,8 @@ public class BlockFluidPump extends BlockOrientableMachine
                 return AABB_NOTH;
             case SOUTH:
                 return AABB_SOUTH;
+            default:
+                return AABB_CUBE;
         }
-        return new AxisAlignedBB(0, 0, 0, 1, 1, 1);
     }
 }

@@ -4,11 +4,13 @@ import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.qbar.QBar;
 
 public abstract class BlockMachineBase extends BlockContainer
 {
-    public String name;
+    public static final AxisAlignedBB AABB_CUBE = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
+    public String                     name;
 
     public BlockMachineBase(final String name, final Material material)
     {
