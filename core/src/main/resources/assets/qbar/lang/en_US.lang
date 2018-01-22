@@ -3,6 +3,7 @@ itemGroup.QBar=QBar
 
 #Creative
 tile.creative_steam_generator.name=Creative Steam Generator
+tile.creative_water_generator.name=Creative Water Generator
 
 #Machines
 tile.keypunch.name=KeyPunch

@@ -4,10 +4,12 @@ import net.minecraft.block.material.Material;
 import net.minecraftforge.fluids.Fluid;
 import net.qbar.common.block.*;
 import net.qbar.common.block.creative.BlockCreativeSteamGenerator;
+import net.qbar.common.block.creative.BlockCreativeWaterGenerator;
 import net.qbar.common.block.BlockStructure;
 import net.qbar.common.multiblock.TileMultiblockGag;
 import net.qbar.common.tile.TileStructure;
 import net.qbar.common.tile.creative.TileCreativeSteamGenerator;
+import net.qbar.common.tile.creative.TileCreativeWaterGenerator;
 import net.qbar.common.tile.machine.*;
 
 public class MachineBlocks
@@ -22,6 +24,7 @@ public class MachineBlocks
         QBarBlocks.registerBlock(
                 new BlockMultiblockMachine<>("assembler", Material.IRON, TileAssembler::new, TileAssembler.class));
         QBarBlocks.registerBlock(new BlockCreativeSteamGenerator());
+        QBarBlocks.registerBlock(new BlockCreativeWaterGenerator());
         QBarBlocks.registerBlock(new BlockStructure());
         QBarBlocks.registerBlock(new BlockMultiblockMachine<>("steamfurnacemk1", Material.IRON, TileSteamFurnace::new,
                 TileSteamFurnace.class));
@@ -56,6 +59,7 @@ public class MachineBlocks
         QBarBlocks.registerTile(TileAssembler.class, "assembler");
         QBarBlocks.registerTile(TileMultiblockGag.class, "multiblockgag");
         QBarBlocks.registerTile(TileCreativeSteamGenerator.class, "creative_steam_generator");
+        QBarBlocks.registerTile(TileCreativeWaterGenerator.class, "creative_water_generator");
         QBarBlocks.registerTile(TileStructure.class, "structure");
         QBarBlocks.registerTile(TileSteamFurnace.class, "steamfurnace");
         QBarBlocks.registerTile(TileSolarBoiler.class, "solarboiler");
