@@ -1,5 +1,6 @@
 package net.qbar.common.tile.creative;
 
+import java.util.EnumMap;
 import java.util.List;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,21 +21,14 @@ public class TileCreativeWaterGenerator extends TileInventoryBase implements ITi
 {
     private final FluidTank fluidTank;
     private final int transferCapacity;
-    private IFluidHandler top;
-    private IFluidHandler bottom;
-    private IFluidHandler east;
-    private IFluidHandler west;
-    private IFluidHandler north;
-    private IFluidHandler south;
-
-    private IFluidHandler[] handler;
+    EnumMap<EnumFacing, IFluidHandler> handler;
     public TileCreativeWaterGenerator()
     {
         super("TileCreativeWaterGenerator", 0);
 
         this.fluidTank = new CreativeFluidTank(FluidRegistry.WATER);
         this.transferCapacity = Integer.MAX_VALUE;
-        this.handler = new IFluidHandler[EnumFacing.VALUES.length];
+        this.handler = new EnumMap<>(EnumFacing.class);
     }
 
     @Override
@@ -109,16 +103,17 @@ public class TileCreativeWaterGenerator extends TileInventoryBase implements ITi
 
         if (tile != null && tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing))
         {
-            this.handler[facing.ordinal()] = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing);
+            this.handler.put(facing, tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing));
         }
-        else if(this.handler[facing.ordinal()] != null)
-            this.handler[facing.ordinal()] = null;
+        else if(this.handler.get(facing) != null)
+            this.handler.put(facing, null);
     }
     
     public void transferFluids()
     {
-        for(IFluidHandler face : this.handler)
-            if (face != null)
-                face.fill(new FluidStack(FluidRegistry.WATER, this.transferCapacity), true);
+        this.handler.forEach((face, handler) -> {
+            if(handler != null)
+                handler.fill(new FluidStack(FluidRegistry.WATER, this.transferCapacity), true);
+        });
     }
 }
