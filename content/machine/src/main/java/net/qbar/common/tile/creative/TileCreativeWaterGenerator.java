@@ -15,17 +15,16 @@ import net.minecraftforge.fluids.FluidTank;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.qbar.common.fluid.CreativeFluidTank;
-import net.qbar.common.tile.TileInventoryBase;
+import net.qbar.common.tile.QBarTileBase;
 
-public class TileCreativeWaterGenerator extends TileInventoryBase implements ITickable
+public class TileCreativeWaterGenerator extends QBarTileBase implements ITickable
 {
     private final FluidTank fluidTank;
     private final int transferCapacity;
-    EnumMap<EnumFacing, IFluidHandler> handler;
+    private EnumMap<EnumFacing, IFluidHandler> handler;
+    
     public TileCreativeWaterGenerator()
     {
-        super("TileCreativeWaterGenerator", 0);
-
         this.fluidTank = new CreativeFluidTank(FluidRegistry.WATER);
         this.transferCapacity = Integer.MAX_VALUE;
         this.handler = new EnumMap<>(EnumFacing.class);
@@ -83,7 +82,7 @@ public class TileCreativeWaterGenerator extends TileInventoryBase implements ITi
     @Override
     public void update()
     {
-        if (!this.world.isRemote)
+        if (this.isServer())
         {
             if (this.world.getTotalWorldTime() % 40 == 0)
                 this.scanFluidHandlers();
@@ -106,14 +105,11 @@ public class TileCreativeWaterGenerator extends TileInventoryBase implements ITi
             this.handler.put(facing, tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing));
         }
         else if(this.handler.get(facing) != null)
-            this.handler.put(facing, null);
+            this.handler.remove(facing);
     }
     
     public void transferFluids()
     {
-        this.handler.forEach((face, handler) -> {
-            if(handler != null)
-                handler.fill(new FluidStack(FluidRegistry.WATER, this.transferCapacity), true);
-        });
+        this.handler.forEach((face, handler) -> handler.fill(new FluidStack(FluidRegistry.WATER, this.transferCapacity), true));
     }
 }

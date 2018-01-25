@@ -1,23 +1,20 @@
 package net.qbar.common.tile.creative;
 
+import java.util.List;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 import net.qbar.common.steam.CapabilitySteamHandler;
 import net.qbar.common.steam.CreativeSteamTank;
 import net.qbar.common.steam.SteamTank;
-import net.qbar.common.tile.TileInventoryBase;
+import net.qbar.common.tile.QBarTileBase;
 
-import java.util.List;
-
-public class TileCreativeSteamGenerator extends TileInventoryBase
+public class TileCreativeSteamGenerator extends QBarTileBase
 {
     private final SteamTank steamTank;
 
     public TileCreativeSteamGenerator()
     {
-        super("TileCreativeSteamGenerator", 0);
-
         this.steamTank = new CreativeSteamTank();
     }
 
