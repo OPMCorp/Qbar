@@ -8,7 +8,6 @@ import net.minecraftforge.fluids.FluidTank;
 
 public class CreativeFluidTank extends FluidTank
 {
-
     public CreativeFluidTank(@Nullable Fluid fluid)
     {
         super(Integer.MAX_VALUE);
