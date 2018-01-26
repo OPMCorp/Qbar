@@ -104,7 +104,7 @@ public class TileCreativeWaterGenerator extends QBarTileBase implements ITickabl
         {
             this.handler.put(facing, tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, facing));
         }
-        else if(this.handler.get(facing) != null)
+        else if(this.handler.containsKey(facing))
             this.handler.remove(facing);
     }
     
